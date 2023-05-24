@@ -21,11 +21,12 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-
+        // Testing commit
         Sphere sphere = new Sphere(50);
 
         sphere.translateXProperty().set(WIDTH/2);
         sphere.translateYProperty().set(HEIGHT/2);
+
 
         // ******************************************
         Group g = new Group();
