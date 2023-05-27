@@ -1,13 +1,15 @@
-package project.sss;
+/*
+* ENTIRE PROGRAM FOR A ROTATING LIGHT SOURCE AROUND A TEXTURED BOX
+* CAN BE USED TO COPY OVER THE ANIMATION PROPERTY OF ROTATION
+* */
 
+package Testing;
+
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.geometry.Point3D;
-import javafx.scene.Camera;
-import javafx.scene.Group;
-import javafx.scene.PerspectiveCamera;
-import javafx.scene.Scene;
+import javafx.scene.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
@@ -16,15 +18,16 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
+import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
 
-public class Main extends Application {
+public class RotatingLight extends Application {
 
-    private static final int WIDTH = 1000;
-    private static final int HEIGHT = 500;
+    private static final int WIDTH = 1280;
+    private static final int HEIGHT = 720;
 
     private double anchorX, anchorY;
     private double anchorAngleX = 0;
@@ -38,10 +41,11 @@ public class Main extends Application {
 
         Box box = textureBox();
 
-
-
         SmartGroup g = new SmartGroup();
         g.getChildren().add(box);
+        g.getChildren().addAll(prepareLightSource());
+        g.getChildren().add(new AmbientLight());
+
 
         g.translateXProperty().set(WIDTH/2);
         g.translateYProperty().set(HEIGHT/2);
@@ -53,6 +57,7 @@ public class Main extends Application {
 
 
         Camera camera = new PerspectiveCamera();
+        camera.translateZProperty().set(-200);
 
 
         // ******************************************
@@ -61,43 +66,66 @@ public class Main extends Application {
         initMouseControl(g, scene, stage);
         // Keyboard listener for moving sphere back and forward
         stage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-
             switch (event.getCode()) {
                 case W: g.translateZProperty().set(g.getTranslateZ()  + 100);
                     break;
                 case S: g.translateZProperty().set(g.getTranslateZ()  - 100);
                     break;
-                /*case Q: g.rotateY(-10);
-                    break;
-                case E: g.rotateY(10);
-                    break;
-                case UP: g.rotateX(-10);
-                    break;
-                case DOWN: g.rotateX(10);
-                    break;*/
             }
         });
 
         scene.setCamera(camera);
 
-
-
         stage.setTitle("Solar System Simulation - By Faris Dababneh");
         stage.setScene(scene);
         stage.show();
+
+        // ANIMATION FOR ROTATION
+        AnimationTimer timer = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                pointLight.setRotate(pointLight.getRotate() + 1);
+            }
+        };
+        timer.start();
+    }
+
+    private final PointLight pointLight = new PointLight();
+    private Node[] prepareLightSource() {
+
+        // Ambient light gives everything the same light amount
+//        AmbientLight ambientLight = new AmbientLight();
+//        ambientLight.setColor(Color.AQUA);
+//        return ambientLight;
+
+        pointLight.setColor(Color.RED);
+        pointLight.getTransforms().add(new Translate(0, -200, 150));
+        // For the rotation animation
+        pointLight.setRotationAxis(Rotate.X_AXIS);
+
+        // TO REPRESENT THE POINT LIGHT
+        Sphere sphere = new Sphere(15);
+        // Position of point light
+        sphere.getTransforms().setAll(pointLight.getTransforms());
+        sphere.rotateProperty().bind(pointLight.rotateProperty());
+        sphere.rotationAxisProperty().bind(pointLight.rotationAxisProperty());
+
+
+        return new Node[]{pointLight, sphere};
     }
 
     private Box textureBox() {
         // Texture material object
         PhongMaterial material = new PhongMaterial();
-        material.setDiffuseColor(Color.ROYALBLUE);
+        //material.setDiffuseColor(Color.ROYALBLUE);
 
-        //Image image = new Image(getClass().getResource());
+        // REFLECTIVE PROPERTY
+        // material.setSpecularColor(Color.valueOf("#424242"));
 
-        material.setDiffuseMap(new Image(String.valueOf(new File("C:\\Users\\882355\\IdeaProjects\\Solar System Simulation\\src\\main\\java\\project\\sss\\vikr.jpg"))));
+        // TEXTURE PROPERTY
+        material.setDiffuseMap(new Image(String.valueOf(new File("E:\\VSCODE PROJECTS\\Solar-System-Simulation\\src\\main\\java\\resources\\Stylized_Stone_Floor_005_basecolor.jpg"))));
 
-
-        Box box = new Box(100, 20, 50);
+        Box box = new Box(400, 80, 200);
 
         box.setMaterial(material);
 

@@ -5,4 +5,6 @@ module project.sss {
 
     opens project.sss to javafx.fxml;
     exports project.sss;
+    exports Testing;
+    opens Testing to javafx.fxml;
 }
