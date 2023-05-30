@@ -33,6 +33,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
@@ -77,24 +78,24 @@ public class SolarSystemSimulation extends Application {
         Group root = new Group();
         root.getChildren().add(prepareImages());
 
-        zoomSlider = getZoomSlider();
+        //zoomSlider = getZoomSlider();
 
-        root.getChildren().addAll(getLabels());
+        //root.getChildren().addAll(getLabels());
 
         Group system = new Group();
         system.getChildren().addAll(sun.prepareSun());
         system.getChildren().addAll(earth.prepareEarth());
         root.getChildren().add(system);
-        system.translateZProperty().bind(zoomSlider.valueProperty());
 
-        root.getChildren().add(zoomSlider);
+
+        root.getChildren().addAll(createControls(system));
 
         Scene scene = new Scene(root, WIDTH, HEIGHT, true);
         scene.setFill(Color.SILVER);
 
 
         // CAN MOVE THE SIMULATION AROUND
-        initMouseControl(system, scene, stage);
+        initMouseControl(system, scene);
 
 
         scene.setCamera(camera);
@@ -106,35 +107,41 @@ public class SolarSystemSimulation extends Application {
         prepareSpin();
     }
 
-    public Slider getZoomSlider() {
-        Slider zoom = new Slider();
-        zoom.setMax(800);
-        zoom.setMin(-200);
+    public Node[] createControls(Group g) {
+        zoomSlider = new Slider();
+        zoomSlider.setMax(1000);
+        zoomSlider.setMin(-200);
+        zoomSlider.setValue(50);
 
-        zoom.setPrefWidth(300d);
-        zoom.setLayoutX(-150);
-        zoom.setLayoutY(200);
-        zoom.setShowTickLabels(true);
-        zoom.setTranslateZ(5);
-        zoom.setStyle("-fx-base: black");
-
-        return zoom;
-    }
+        zoomSlider.setPrefWidth(300d);
+        zoomSlider.setLayoutX(-150);
+        zoomSlider.setLayoutY(210);
+        zoomSlider.setShowTickLabels(true);
+        zoomSlider.setTranslateZ(5);
+        zoomSlider.setStyle("-fx-base: black");
+        g.translateZProperty().bind(zoomSlider.valueProperty());
 
 
-    public Node[] getLabels() {
-        Label zoomLabel = new Label("Zoom: " + zoomSlider.getValue());
+        Label zoomLabel = new Label("zoomSlider: " + zoomSlider.getValue());
         Label timeLabel = new Label("Time: 0");
-        zoomLabel.setLayoutX(0);
+        zoomLabel.setLayoutX(-WIDTH/2);
         zoomLabel.setLayoutY(0);
         zoomLabel.setTranslateZ(-50);
 
 
-        timeLabel.setLayoutX(0);
+        timeLabel.setLayoutX(-WIDTH/2);
         timeLabel.setLayoutY(20);
 
-        return new Node[]{zoomLabel, timeLabel};
+        return new Node[]{zoomSlider, zoomLabel, timeLabel};
     }
+
+    public SubScene getScene3D(Group group) {
+        SubScene scene3d = new SubScene(group, WIDTH, HEIGHT, true, SceneAntialiasing.BALANCED);
+
+        scene3d.setCamera(new PerspectiveCamera());
+        return scene3d;
+    }
+
     private void prepareSpin() {
         AnimationTimer timer = new AnimationTimer() {
             @Override
@@ -163,7 +170,7 @@ public class SolarSystemSimulation extends Application {
 
 
 
-    private void initMouseControl(Group group, Scene scene, Stage stage) {
+    private void initMouseControl(Group group, Scene scene) {
         Rotate xRotate;
         Rotate yRotate;
         group.getTransforms().addAll (
@@ -187,7 +194,7 @@ public class SolarSystemSimulation extends Application {
         });
 
         /*
-       CODE FOR ZOOM CONTROL USING SCROLL WHEEL
+       CODE FOR zoomSlider CONTROL USING SCROLL WHEEL
        REMOVED BECAUSE SLIDER IS USED FOR THIS PURPOSE
 
         stage.addEventHandler(ScrollEvent.SCROLL, event -> {
