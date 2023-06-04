@@ -29,12 +29,13 @@ SUN:
 
 package project.sss;
 
-import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -45,24 +46,28 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
-import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static javafx.scene.input.KeyCode.*;
 
 public class SolarSystemSimulation extends Application {
 
-    private static final float WIDTH = 1400;
-    private static final float HEIGHT = 1000;
+    private static Rectangle2D screenBounds = Screen.getPrimary().getBounds();
+    private static final double WIDTH = screenBounds.getWidth();
+    private static final double HEIGHT = screenBounds.getHeight();
 
     private double anchorX, anchorY;
+    private final Font font = new Font("Roboto", 10);
     private double anchorAngleX = 0;
     private double anchorAngleY = 0;
     private final DoubleProperty angleX = new SimpleDoubleProperty(0);
@@ -70,24 +75,19 @@ public class SolarSystemSimulation extends Application {
 
     private Camera camera;
     private final Earth earth = new Earth();
-    private final Moon moon = new Moon();
+    //private final Moon moon = new Moon();
     private final Sun sun = new Sun();
-
 
     private Slider zoomSlider;
 
-    public float getStageWidth() {
-        return WIDTH;
-    }
-    public float getStageHeight() {
-        return HEIGHT;
-    }
     @Override
     public void start(Stage stage) throws IOException {
         camera = new PerspectiveCamera(true);
         camera.setNearClip(1);
         camera.setFarClip(10000);
         camera.translateZProperty().set(-1000);
+
+
 
 
         // Seperate group for background objects (not mouse controllable)
@@ -97,6 +97,7 @@ public class SolarSystemSimulation extends Application {
         Group system = new Group();
         system.getChildren().addAll(sun.prepareSun());
         system.getChildren().addAll(earth.prepareEarth());
+
         system.getChildren().add(sun.getPointLight());
         system.getChildren().add(earth.getPointLight());
 
@@ -117,7 +118,8 @@ public class SolarSystemSimulation extends Application {
                 } else {
                     System.out.println("ELSE STATEMENT");
                     System.out.println(system.getChildren());
-                    for (int i = 4; i < system.getChildren().size(); i++) {
+
+                    for (int i = 5; i < system.getChildren().size(); i++) {
                         system.getChildren().remove(i);
                         i--;
                     }
@@ -130,9 +132,12 @@ public class SolarSystemSimulation extends Application {
 
         root.getChildren().add(system);
 
+
         Scene scene = new Scene(root, WIDTH, HEIGHT, true);
         scene.setFill(Color.SILVER);
+
         root.getChildren().addAll(createControls(system, scene));
+        //root.getChildren().addAll(controls(system));
 
         // CAN MOVE THE SIMULATION AROUND
         initMouseControl(system, scene);
@@ -141,7 +146,9 @@ public class SolarSystemSimulation extends Application {
         scene.setCamera(camera);
         stage.setTitle("Solar System Simulation - By Faris Dababneh");
         stage.setScene(scene);
-        stage.setMaximized(true);
+        //stage.setMaximized(true);
+
+        System.out.println(WIDTH + " " + HEIGHT);
         stage.show();
 
     }
@@ -164,9 +171,10 @@ public class SolarSystemSimulation extends Application {
         return new Node[]{x, y, z};
     }
 
+
     public Node[] createControls(Group g, Scene scene) {
         zoomSlider = new Slider();
-        zoomSlider.setMax(1000);
+        zoomSlider.setMax(1200);
         zoomSlider.setMin(-200);
         zoomSlider.setValue(50);
 
@@ -182,56 +190,68 @@ public class SolarSystemSimulation extends Application {
 
         Label zoomLabel = new Label("Zoom: " + (int) zoomSlider.getValue());
         Label timeLabel = new Label("Time: 0");
-        zoomLabel.setLayoutX(-450);
-        zoomLabel.setLayoutY(-200);
+        //zoomLabel.setLayoutX(-450);
+        //zoomLabel.setLayoutY(-200);
+        zoomLabel.setAlignment(Pos.TOP_LEFT);
         zoomLabel.setTranslateZ(-50);
         zoomLabel.setTextFill(Color.WHITE);
         zoomLabel.setVisible(visible.get());
 
         VBox vbox = new VBox();
-        vbox.setPadding(new Insets(15, 12, 15, 12));
+        vbox.setPadding(new Insets(10, 12, 10, 12));
         vbox.setSpacing(10);
-        vbox.setLayoutX(-500);
-        vbox.setLayoutY(-210);
+        vbox.setLayoutX(-WIDTH/4 + 175);
+        vbox.setLayoutY(-228);
+        //vbox.setAlignment(Pos.TOP_LEFT);
         vbox.setTranslateZ(-50);
         //vbox.setPrefWidth(WIDTH);
         //vbox.setBackground(new Background());
-        vbox.setStyle(" -fx-background-image: url(\"C:\\Users\\882355\\IdeaProjects\\Solar System Simulation\\src\\main\\java\\resources\\galaxy.jpg\");");
+        vbox.setStyle(" -fx-background-image: url(\"E:\\VSCODE PROJECTS\\Solar-System-Simulation\\src\\main\\java\\resources\\galaxy.jpg\");");
+        //vbox.setStyle("-fx-background-color: #FFFFFF");
 
-        Label stats = new Label("Show Stats");
-        stats.setPrefSize(68, 10);
+        Label stats = new Label("Stats: off");
+        stats.setPrefSize(60, 10);
         stats.setPadding(new Insets(2, 2, 2, 2));
-        stats.setStyle("-fx-text-fill: #FFFFFF; -fx-border-color: #ffaf38; -fx-border-width: 0.8px");
+        stats.setStyle("-fx-background-color: #f73131");
+        stats.setFont(font);
 
         CheckBox statShow = new CheckBox();
-        statShow.setSelected(true);
+        statShow.setSelected(false);
 
         HBox statBox = new HBox(stats, statShow);
 
-        Label pause = new Label("Pause");
+        Label pause = new Label("Running");
         pause.setPrefSize(45, 10);
         pause.setPadding(new Insets(2, 2, 2, 2));
-        pause.setStyle("-fx-text-fill: #FFFFFF; -fx-border-color: #ffaf38; -fx-border-width: 0.8px");
+        pause.setStyle("-fx-background-color: #35f731");
+        pause.setFont(font);
+
+        CheckBox checkPause = new CheckBox();
+        checkPause.setSelected(false);
+
+        HBox pauseBox = new HBox(pause, checkPause);
 
 
         Label speed = new Label("Speed (1s)");
-        speed.setPrefSize(65, 10);
+        speed.setPrefSize(60, 10);
         speed.setPadding(new Insets(2, 2, 2, 2));
         speed.setStyle("-fx-text-fill: #FFFFFF; -fx-border-color: #ffaf38; -fx-border-width: 0.8px");
+        speed.setFont(font);
 
         String[] speeds = {"12hrs", "1d", "1m", "6ms", "1yr", "5 yrs"};
         ChoiceBox selectSpeed = new ChoiceBox(FXCollections.observableArrayList(speeds));
         selectSpeed.setValue(speeds[1]);
         selectSpeed.setLayoutY(-210);
-        selectSpeed.setPrefSize(60, 5);
-        selectSpeed.setStyle("-fx-background-radius: 0");
+        selectSpeed.setPrefSize(45, 5);
+        selectSpeed.setStyle("-fx-background-radius: 0; -fx-font-family: Roboto; -fx-font-size: 10px");
+
 
         HBox speedBox = new HBox(speed, selectSpeed);
         speedBox.setPadding(new Insets(2, 2, 2, 0));
 
-        vbox.getChildren().addAll(statBox, pause, speedBox);
+        vbox.getChildren().addAll(statBox, pauseBox, speedBox);
 
-        stats.setOnMouseClicked(event -> {
+        statShow.setOnMouseClicked(event -> {
             if (visible.get()) {
                 visible.set(false);
                 zoomLabel.setVisible(visible.get());
@@ -245,14 +265,16 @@ public class SolarSystemSimulation extends Application {
             }
         });
 
-        pause.setOnMouseClicked(event -> {
-            if (pause.getText().equals("Pause")) {
-                pause.setText("Unpause");
+        checkPause.setOnMouseClicked(event -> {
+            if (pause.getText().equals("Running")) {
+                pause.setText("Paused");
+                pause.setPrefSize(48, 10);
                 pause.setStyle("-fx-background-color: #f73131");
                 earth.pause(true);
                 sun.pause(true);
             } else {
-                pause.setText("Pause");
+                pause.setText("Running");
+                pause.setPrefSize(50, 10);
                 pause.setStyle("-fx-background-color: #35f731");
                 earth.pause(false);
                 sun.pause(false);
@@ -269,6 +291,8 @@ public class SolarSystemSimulation extends Application {
             zoomLabel.setText("Zoom: " + (int) zoomSlider.getValue());
         });
 
+
+
         timeLabel.setLayoutX(-WIDTH/2);
         timeLabel.setLayoutY(20);
 
@@ -277,20 +301,21 @@ public class SolarSystemSimulation extends Application {
 
 
     private ImageView[] prepareImages() {
-        Image galaxy = new Image(String.valueOf(new File("C:\\Users\\882355\\IdeaProjects\\Solar System Simulation\\src\\main\\java\\resources\\galaxy.jpg")));
+        Image galaxy = new Image(String.valueOf(new File("E:\\VSCODE PROJECTS\\Solar-System-Simulation\\src\\main\\java\\resources\\galaxy.jpg")));
         ImageView galaxyView = new ImageView(galaxy);
         galaxyView.setPreserveRatio(false);
 
         galaxyView.getTransforms().add(new Translate(-galaxy.getWidth()/2, -galaxy.getHeight()/2, 6000));
 
-        Image logo = new Image(String.valueOf(new File("C:\\Users\\882355\\IdeaProjects\\Solar System Simulation\\src\\main\\java\\resources\\logo.png")));
+        Image logo = new Image(String.valueOf(new File("E:\\VSCODE PROJECTS\\Solar-System-Simulation\\src\\main\\java\\resources\\logo.png")));
         ImageView logoView = new ImageView(logo);
         logoView.setPreserveRatio(false);
+        System.out.println(logoView.getImage().getWidth() + " " + logoView.getImage().getHeight());
 
-        logoView.scaleXProperty().set(0.5);
-        logoView.scaleYProperty().set(0.5);
-        logoView.setLayoutX(-630);
-        logoView.setLayoutY(-310);
+        logoView.scaleXProperty().set(0.3);
+        logoView.scaleYProperty().set(0.3);
+        logoView.setLayoutX(-WIDTH/4 + 5);
+        logoView.setLayoutY(-HEIGHT/4 + 43);
         //logoView.getTransforms().add(new Translate(-500, -255, -10));
 
 
