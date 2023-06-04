@@ -25,8 +25,12 @@ public class Earth {
     private final Sphere moon = new Sphere(15);
     private final Cylinder axis = new Cylinder(2, 120);
 
-    private final Cylinder axisMoon = new Cylinder(2, 50);
+    private final Cylinder axisMoon = new Cylinder(2, 70);
     private final PointLight pointLight = new PointLight();
+
+    private Rotate moonRotate = new Rotate(0, 0, 0, 800, new Point3D(0, 1, 0));
+
+    private Rotate moonR = new Rotate(0, 0, 0, 0, new Point3D(0, 1, 0));;;
 
     private AnimationTimer timer;
     public Sphere getEarth() {
@@ -50,27 +54,27 @@ public class Earth {
     }
     public Node[] prepareMoon(){
         PhongMaterial moonMaterial = new PhongMaterial();
-        moonMaterial.setDiffuseMap(new Image(String.valueOf(new File("C:\\Users\\882355\\IdeaProjects\\Solar System Simulation\\src\\main\\java\\resources\\moon-mapp.jpg"))));
+        moonMaterial.setDiffuseMap(new Image(String.valueOf(new File("E:\\VSCODE PROJECTS\\Solar-System-Simulation\\src\\main\\java\\resources\\moon-mapp.jpg"))));
 
         PhongMaterial axisMat = new PhongMaterial();
         axisMat.setDiffuseColor(Color.RED);
-        moon.setMaterial(moonMaterial);
+        //moon.setMaterial(moonMaterial);
         axisMoon.setMaterial(axisMat);
 
-        moon.getTransforms().add(new Translate(0, -200, -105));
-        axisMoon.getTransforms().add(new Translate(0, -200, -105));
+        moon.getTransforms().add(new Translate(0, 0, -400));
+        axisMoon.getTransforms().add(new Translate(0, 0, -430));
 
 
         return new Node[]{moon, axisMoon};
     }
 
     public Node[] prepareEarth() {
-
+        //prepareMoon();
         PhongMaterial earthMaterial = new PhongMaterial();
-        earthMaterial.setDiffuseMap(new Image(String.valueOf(new File("C:\\Users\\882355\\IdeaProjects\\Solar System Simulation\\src\\main\\java\\resources\\earth-map.jpg"))));
-        earthMaterial.setSelfIlluminationMap(new Image(String.valueOf(new File("C:\\Users\\882355\\IdeaProjects\\Solar System Simulation\\src\\main\\java\\resources\\earth-illumination.jpg"))));
-        earthMaterial.setSpecularMap(new Image(String.valueOf(new File("C:\\Users\\882355\\IdeaProjects\\Solar System Simulation\\src\\main\\java\\resources\\earth-specular.tif"))));
-        earthMaterial.setBumpMap(new Image(String.valueOf(new File("C:\\Users\\882355\\IdeaProjects\\Solar System Simulation\\src\\main\\java\\resources\\earth-bump.tif"))));
+        earthMaterial.setDiffuseMap(new Image(String.valueOf(new File("E:\\VSCODE PROJECTS\\Solar-System-Simulation\\src\\main\\java\\resources\\earth-map.jpg"))));
+        earthMaterial.setSelfIlluminationMap(new Image(String.valueOf(new File("E:\\VSCODE PROJECTS\\Solar-System-Simulation\\src\\main\\java\\resources\\earth-illumination.jpg"))));
+        earthMaterial.setSpecularMap(new Image(String.valueOf(new File("E:\\VSCODE PROJECTS\\Solar-System-Simulation\\src\\main\\java\\resources\\earth-specular.tif"))));
+        earthMaterial.setBumpMap(new Image(String.valueOf(new File("E:\\VSCODE PROJECTS\\Solar-System-Simulation\\src\\main\\java\\resources\\earth-bump.tif"))));
 
         PhongMaterial axisMat = new PhongMaterial();
         axisMat.setDiffuseColor(Color.RED);
@@ -87,10 +91,10 @@ public class Earth {
         earth.getTransforms().add(new Translate(0, 0, -505));
         axis.getTransforms().add(new Translate(0, 0, -505));
 
-        //prepareMoon();
+
 
         //earth.setLayoutX(-500);
-
+        prepareMoon();
         prepareOrbit();
         return new Node[]{earth, axis, moon};
     }
@@ -102,16 +106,29 @@ public class Earth {
         tilt.setAngle(23.5);
         //Rotate seasons = new Rotate(0, 0, 0, 0, new Point3D(1, 0, 0));
 
-
         earth.getTransforms().addAll(rotate, r, tilt);
         axis.getTransforms().addAll(rotate, tilt);
+
+
+        moonRotate.setPivotX(earth.getLayoutX());
+        moonRotate.setPivotZ(earth.getTranslateZ());
+        moonR.setPivotX(earth.getLayoutX());
+        moonR.setPivotZ(earth.getTranslateZ());
+        moon.getTransforms().addAll(moonRotate, moonR);
+
         //earth.getEarth().setRotationAxis(Rotate.X_AXIS);
 
         timer = new AnimationTimer() {
             @Override
             public void handle(long l) {
+
                 r.setAngle(r.getAngle() - 1.5); // FOR SPIN
-                rotate.setAngle(rotate.getAngle() + 0.03); // FOR ORBIT
+                rotate.setAngle(rotate.getAngle() + 0.02); // FOR ORBIT
+
+                moonR.setAngle(moonR.getAngle() - 0.2); // FOR SPIN
+                moonRotate.setAngle(moonRotate.getAngle() + 0.009); // FOR ORBIT
+
+
 
             }
         };
